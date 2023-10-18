@@ -1,3 +1,4 @@
+import { SignOutButton, useUser } from "@clerk/nextjs";
 import Head from "next/head";
 import Link from "next/link";
 
@@ -15,6 +16,9 @@ export default function Home() {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
+
+					{!!user.isSignedIn && <div className="self-end rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"><SignOutButton /></div>}
+
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
             Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
           </h1>
