@@ -2,7 +2,38 @@ import { SignOutButton, useUser } from "@clerk/nextjs";
 import Head from "next/head";
 import Link from "next/link";
 
-import { api } from "~/utils/api";
+import { type RouterOutputs, api } from "~/utils/api";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
+
+type PostWithUser = RouterOutputs["post"]["getAll"][number];
+
+export function PostView(props: PostWithUser) {
+	const { post, author } = props;
+
+	const authorSaid = author?.username ? <div className="flex mb-1"><span className="text-gray-400 mr-2 font-bold">@{author.username}</span> · {dayjs(post.createdAt).fromNow()}</div> : '';
+
+	return (
+		<div key={post.id} data-author={author?.id} className="w-full rounded-xl bg-purple-500/10 p-4 text-white">
+			{authorSaid}
+			<span className="ml-4">{post.content}</span>
+		</div>
+	);
+
+};
+
+export function CreatePostWizard() {
+	const user = useUser();
+
+	if (user && user.isSignedIn) {
+		return (
+			<div className="flex w-full rounded-xl bg-white/10 p-4 text-white">
+				<input placeholder="Enter your thoughts" className="w-full bg-transparent outline-none"/>
+			</div>
+		)
+	}
+};
 
 export default function Home() {
 	const { data } = api.post.getAll.useQuery();
@@ -21,7 +52,7 @@ export default function Home() {
 					{!!user.isSignedIn && <div className="self-end rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"><SignOutButton /></div>}
 
 					<h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-						Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
+						Chirp
 					</h1>
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
 						<Link
@@ -47,9 +78,10 @@ export default function Home() {
 							</div>
 						</Link>
 					</div>
-					<div className="w-full rounded-xl bg-purple-500/10 p-4 text-white">
-						{data?.map((post) => (<div key={post.id}>{post.content}</div>))}
-					</div>
+					<CreatePostWizard/>
+					{data?.map((fullPost) => (
+						<PostView {...fullPost} key={fullPost.post.id} />
+					))}
 				</div>
 			</main>
 			</>
